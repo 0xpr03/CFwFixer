@@ -1,5 +1,4 @@
 #include "main.h"
-#include "WindowHandler.h"
 
 /**
  *CF window fixer (c) Aron Heinecke 2015, all rights reserved
@@ -9,15 +8,18 @@
 UINT WM_TASKBAR = 0;
 HWND Hwnd;
 HMENU Hmenu;
+HHOOK KBHook;
 NOTIFYICONDATA notifyIconData;
-TCHAR szTIP[64] = TEXT("Crossfire window Fixer © Aron Heinecke");
+TCHAR szTIP[64] = TEXT("Crossfire window fixer © Aron Heinecke");
 char szClassName[] = "tray window";
 bool first_paint = true;
-WindowHandler wHandler = WindowHandler::WindowHandler("subfile_file_search");
+WindowHandler wHandler = WindowHandler::WindowHandler(CF_WINDOW);
 
 
 /*procedures  */
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
+LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+char* GetLastErrorString(void);
 void print_message(char *);
 void InitNotifyIconData();
 
@@ -49,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 	wincl.hbrBackground = (HBRUSH)(CreateSolidBrush(RGB(255, 255, 255)));
 	/* Register the window class, and if it fails quit the program */
 	if (!RegisterClassEx(&wincl))
-		return 0;
+		return 503;
 
 	/* The class is registered, let's create the program*/
 	Hwnd = CreateWindowEx(
@@ -71,6 +73,20 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 	/* Make the window visible on the screen */
 	ShowWindow(Hwnd, nCmdShow);
 
+	// store address of hook proc
+	HOOKPROC lpfnHookProc = &LowLevelKeyboardProc;
+	// try to set hook
+	KBHook = SetWindowsHookEx(WH_KEYBOARD_LL, lpfnHookProc, GetModuleHandle(NULL), 0);
+	// if hook was not installed, get the last error code, and string and
+	//     show them both in a messagebox()
+	if (KBHook == NULL)
+	{
+		char lpBuffer[50];
+		char* errorString = GetLastErrorString();
+		strcat_s(lpBuffer, errorString);
+		MessageBox(HWND_DESKTOP, lpBuffer, "keyboard hook could not be installed!", MB_OK);
+	}
+
 	/* Run the message loop. It will run until GetMessage() returns 0 */
 	while (GetMessage(&messages, NULL, 0, 0))
 	{
@@ -78,12 +94,16 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 		TranslateMessage(&messages);
 		/* Send message to WindowProcedure */
 		DispatchMessage(&messages);
+	}
 
-		if (messages.message == WM_HOTKEY) {
-			print_message("recived hotkey!!");
-			if (wHandler.Run()) {
-				PostMessage(Hwnd, WM_WINDOW_ERROR, 0, 0);
-			}
+	// if there is a valid hook procedure, uninstall it
+	if (KBHook)
+	{
+		// if unhookwindowshookex fails, show the last error as a string
+		if (!UnhookWindowsHookEx(KBHook))
+		{
+			char* errorString = GetLastErrorString();
+			MessageBox(HWND_DESKTOP, errorString, "Last Error", MB_OK);
 		}
 	}
 
@@ -114,8 +134,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
 		break;
 	case WM_TRAY_READY: // own type
-		if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, HOTKEY) == NULL) { /** accepting only one-time press, registration error check **/
-			notifyIconData.uFlags = NIF_INFO;
+		/*if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, HOTKEY) == NULL) { /** accepting only one-time press, registration error check **/
+		/*	notifyIconData.uFlags = NIF_INFO;
 			strcpy_s(notifyIconData.szInfoTitle, "ERROR"); // Title
 			strcpy_s(notifyIconData.szInfo, "Couldn't register hotkey Alt + L"); // Copy Tip
 			notifyIconData.uTimeout = 5000;
@@ -124,15 +144,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 
 			PostMessage(hwnd, WM_DESTROY, 0, 0);
-		}else {
+		}else {*/
 			notifyIconData.uFlags = NIF_INFO;
 			strcpy_s(notifyIconData.szInfoTitle, "Started"); // Title
-			strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Alt + L in CF."); // Copy Tip
+			strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Str + L in CF.\n© Aron Heinecke"); // Copy Tip
 			notifyIconData.uTimeout = 3000;
 			notifyIconData.dwInfoFlags = NIIF_INFO;
 
 			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
-		}
+		/*}*/
 		break;
 	case WM_WINDOW_ERROR:
 		notifyIconData.uFlags = NIF_INFO;
@@ -220,15 +240,87 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		PostQuitMessage(0);
 		break;
-
 	}
 
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
+LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+	DWORD SHIFT_key = 0;
+	DWORD CTRL_key = 0;
+	DWORD ALT_key = 0;
+
+	if ((nCode == HC_ACTION) && ((wParam == WM_SYSKEYDOWN) || (wParam == WM_KEYDOWN)))
+	{
+		KBDLLHOOKSTRUCT hooked_key = *((KBDLLHOOKSTRUCT*)lParam);
+		DWORD dwMsg = 1;
+		dwMsg += hooked_key.scanCode << 16;
+		dwMsg += hooked_key.flags << 24;
+		char lpszKeyName[1024] = { 0 };
+		lpszKeyName[0] = '[';
+
+		int i = GetKeyNameText(dwMsg, (lpszKeyName + 1), 0xFF) + 1;
+		lpszKeyName[i] = ']';
+
+		int key = hooked_key.vkCode;
+
+		SHIFT_key = GetAsyncKeyState(VK_SHIFT);
+		CTRL_key = GetAsyncKeyState(VK_CONTROL);
+		ALT_key = GetAsyncKeyState(VK_MENU);
+
+		if (key >= 'A' && key <= 'Z')
+		{
+
+			if (GetAsyncKeyState(VK_SHIFT) >= 0) key += 32;
+
+			if (CTRL_key != 0 && key == 'l')
+			{
+				if (wHandler.Run()) {
+					PostMessage(Hwnd, WM_WINDOW_ERROR, 0, 0);
+				}
+				CTRL_key = 0;
+			}
+
+			/*if (CTRL_key != 0 && key == 'q')
+			{
+				MessageBox(NULL, "Shutting down", "H O T K E Y", MB_OK);
+				PostQuitMessage(0);
+			}*/
+
+			//printf("key = %c\n", key);
+
+			SHIFT_key = 0;
+			CTRL_key = 0;
+			ALT_key = 0;
+
+		}
+
+		//printf("lpszKeyName = %s\n", lpszKeyName);
+	}
+	return CallNextHookEx(KBHook, nCode, wParam, lParam);
+}
+
 void print_message(char * str) {
 	using namespace std;
 	cout << *str;
+}
+
+char* GetLastErrorString(void)
+{
+	LPTSTR pszMessage;
+	DWORD dwLastError = GetLastError();
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dwLastError,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&pszMessage,
+		0, NULL);
+	return pszMessage;
 }
 
 void InitNotifyIconData()

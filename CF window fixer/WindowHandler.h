@@ -9,9 +9,11 @@ public:
 	~WindowHandler();
 private:
 	void get_window_handle();
+	void stripWindow();
+	void redoWindow();
 	char * windowName;
-	HWND old_handle;
-	HWND window_handle;
-	boolean is_fixed;
+	HWND old_handle = NULL;
+	HWND window_handle = NULL;
+	boolean is_fixed = false;
 };
 

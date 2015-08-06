@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "resource.h"
+#include "WindowHandler.h"
 
 #define CF_WINDOW		    "CROSSFIRE"
 #define ID_TRAY_APP_ICON    1001
