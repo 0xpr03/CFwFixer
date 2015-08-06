@@ -8,7 +8,7 @@ WindowHandler::WindowHandler(char * window_name)
 
 boolean WindowHandler::validName()
 {
-	window_handle == 0 ? false : true;
+	return window_handle == 0 ? false : true;
 }
 
 

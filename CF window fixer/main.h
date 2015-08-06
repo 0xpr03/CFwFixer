@@ -8,4 +8,5 @@
 #define ID_TRAY_APP_ICON    1001
 #define ID_TRAY_EXIT        1002
 #define WM_SYSICON          (WM_USER + 1)
+#define WM_TRAY_READY        (WM_USER + 100)
 

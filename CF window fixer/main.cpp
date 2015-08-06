@@ -1,5 +1,9 @@
 #include "main.h"
+#include "WindowHandler.h"
 
+/**
+ *CF window fixer (c) Aron Heinecke 2015, all rights reserved
+ */
 
 /*variables*/
 UINT WM_TASKBAR = 0;
@@ -8,7 +12,8 @@ HMENU Hmenu;
 NOTIFYICONDATA notifyIconData;
 TCHAR szTIP[64] = TEXT("Crossfire window Fixer © Aron Heinecke");
 char szClassName[] = "tray window";
-
+bool first_paint = true;
+WindowHandler wHandler = WindowHandler::WindowHandler("subfile_file_search");
 
 
 /*procedures  */
@@ -73,6 +78,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 		TranslateMessage(&messages);
 		/* Send message to WindowProcedure */
 		DispatchMessage(&messages);
+
 		if (messages.message == WM_HOTKEY) {
 			print_message("recived hotkey!!");
 		}
@@ -101,9 +107,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		break;
 	case WM_CREATE:
 		Hmenu = CreatePopupMenu();
-		AppendMenu(Hmenu, MF_STRING, ID_TRAY_EXIT, TEXT("Exit The Demo"));
-		if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, 0x42) == 0) /** accepting only one-time press & checking for registration error **/
-			std::exit(EXIT_FAILURE);
+		AppendMenu(Hmenu, MF_STRING, ID_TRAY_EXIT, TEXT("Exit CF window fixer"));
+		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
+		break;
+	case WM_TRAY_READY: // own type
+		if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, 0x42) == NULL) { /** accepting only one-time press & checking for registration error **/
+			notifyIconData.uFlags = NIF_INFO;
+			strcpy_s(notifyIconData.szInfoTitle, "ERROR"); // Title
+			strcpy_s(notifyIconData.szInfo, "Couldn't register hotkey Alt + L"); // Copy Tip
+			notifyIconData.uTimeout = 5000;  // 3 Seconds
+			notifyIconData.dwInfoFlags = NIIF_ERROR;
+
+			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
+
+			PostMessage(hwnd, WM_DESTROY, 0, 0);
+		}
+		else {
+			notifyIconData.uFlags = NIF_INFO;
+			strcpy_s(notifyIconData.szInfoTitle, "Started"); // Title
+			strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Alt + L in CF."); // Copy Tip
+			notifyIconData.uTimeout = 5000;  // 3 Seconds
+			notifyIconData.dwInfoFlags = NIIF_INFO;
+
+			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
+		}
 		break;
 	case WM_SYSCOMMAND:
 		/*In WM_SYSCOMMAND messages, the four low-order bits of the wParam parameter
@@ -136,7 +163,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		if (lParam == WM_LBUTTONUP)
 		{
-
+			
 			//restore();
 		}
 		else if (lParam == WM_RBUTTONDOWN)
@@ -172,7 +199,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		else
 			return uHitTest;
 	}
-
 	case WM_CLOSE:
 
 		//minimize() ;
