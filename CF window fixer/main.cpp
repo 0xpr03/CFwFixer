@@ -81,6 +81,7 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 		if (messages.message == WM_HOTKEY) {
 			print_message("recived hotkey!!");
+			wHandler.Run();
 		}
 	}
 
@@ -111,22 +112,21 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
 		break;
 	case WM_TRAY_READY: // own type
-		if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, 0x42) == NULL) { /** accepting only one-time press & checking for registration error **/
+		if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, HOTKEY) == NULL) { /** accepting only one-time press, registration error check **/
 			notifyIconData.uFlags = NIF_INFO;
 			strcpy_s(notifyIconData.szInfoTitle, "ERROR"); // Title
 			strcpy_s(notifyIconData.szInfo, "Couldn't register hotkey Alt + L"); // Copy Tip
-			notifyIconData.uTimeout = 5000;  // 3 Seconds
+			notifyIconData.uTimeout = 5000;
 			notifyIconData.dwInfoFlags = NIIF_ERROR;
 
 			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 
 			PostMessage(hwnd, WM_DESTROY, 0, 0);
-		}
-		else {
+		}else {
 			notifyIconData.uFlags = NIF_INFO;
 			strcpy_s(notifyIconData.szInfoTitle, "Started"); // Title
 			strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Alt + L in CF."); // Copy Tip
-			notifyIconData.uTimeout = 5000;  // 3 Seconds
+			notifyIconData.uTimeout = 3000;
 			notifyIconData.dwInfoFlags = NIIF_INFO;
 
 			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
