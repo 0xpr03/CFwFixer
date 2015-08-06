@@ -30,7 +30,7 @@ boolean WindowHandler::Run() {
 	}else {
 		// code to fix new window
 
-		if_fixed = true;
+		is_fixed = true;
 		old_handle = window_handle;
 	}
 	return false;

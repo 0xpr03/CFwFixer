@@ -81,7 +81,9 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 		if (messages.message == WM_HOTKEY) {
 			print_message("recived hotkey!!");
-			wHandler.Run();
+			if (wHandler.Run()) {
+				PostMessage(Hwnd, WM_WINDOW_ERROR, 0, 0);
+			}
 		}
 	}
 
@@ -131,6 +133,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 		}
+		break;
+	case WM_WINDOW_ERROR:
+		notifyIconData.uFlags = NIF_INFO;
+		strcpy_s(notifyIconData.szInfoTitle, "ERROR"); // Title
+		strcpy_s(notifyIconData.szInfo, "No window found!"); // Copy Tip
+		notifyIconData.uTimeout = 3000;
+		notifyIconData.dwInfoFlags = NIIF_ERROR;
+
+		Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 		break;
 	case WM_SYSCOMMAND:
 		/*In WM_SYSCOMMAND messages, the four low-order bits of the wParam parameter
