@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <string>
 #pragma once
 class WindowHandler
 {
@@ -6,6 +7,7 @@ public:
 	WindowHandler(char * window_name);
 	boolean validName();
 	boolean Run();
+	const char * testFunction();
 	~WindowHandler();
 private:
 	void get_window_handle();
