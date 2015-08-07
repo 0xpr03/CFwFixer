@@ -116,7 +116,6 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
-
 	if (message == WM_TASKBAR && !IsWindowVisible(Hwnd))
 	{
 		//minimize();
