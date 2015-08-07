@@ -109,8 +109,6 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 
 	return messages.wParam;
 }
-
-
 /*  This function is called by the Windows function DispatchMessage()  */
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -132,26 +130,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		AppendMenu(Hmenu, MF_STRING, ID_TRAY_EXIT, TEXT("Exit CF window fixer"));
 		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
 		break;
-	case WM_TRAY_READY: // own type
-		/*if (RegisterHotKey(NULL, 1, MOD_ALT | MOD_NOREPEAT, HOTKEY) == NULL) { /** accepting only one-time press, registration error check **/
-		/*	notifyIconData.uFlags = NIF_INFO;
-			strcpy_s(notifyIconData.szInfoTitle, "ERROR"); // Title
-			strcpy_s(notifyIconData.szInfo, "Couldn't register hotkey Alt + L"); // Copy Tip
-			notifyIconData.uTimeout = 5000;
-			notifyIconData.dwInfoFlags = NIIF_ERROR;
+	case WM_TRAY_READY:
+		notifyIconData.uFlags = NIF_INFO;
+		strcpy_s(notifyIconData.szInfoTitle, "Started"); // Title
+		strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Str + L in CF.\n© Aron Heinecke"); // Copy Tip
+		notifyIconData.uTimeout = 3000;
+		notifyIconData.dwInfoFlags = NIIF_INFO;
 
-			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
-
-			PostMessage(hwnd, WM_DESTROY, 0, 0);
-		}else {*/
-			notifyIconData.uFlags = NIF_INFO;
-			strcpy_s(notifyIconData.szInfoTitle, "Started"); // Title
-			strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Str + L in CF.\n© Aron Heinecke"); // Copy Tip
-			notifyIconData.uTimeout = 3000;
-			notifyIconData.dwInfoFlags = NIIF_INFO;
-
-			Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
-		/*}*/
+		Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 		break;
 	case WM_WINDOW_ERROR:
 		notifyIconData.uFlags = NIF_INFO;
@@ -162,34 +148,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 		break;
-	case WM_SYSCOMMAND:
-		/*In WM_SYSCOMMAND messages, the four low-order bits of the wParam parameter
-		are used internally by the system. To obtain the correct result when testing the value of wParam,
-		an application must combine the value 0xFFF0 with the wParam value by using the bitwise AND operator.*/
-
-		/*switch( wParam & 0xFFF0 )
-		{
-		case SC_MINIMIZE:
-		case SC_CLOSE:
-		minimize() ;
-		return 0 ;
-		break;
-		}*/
-		break;
-
-
-		// Our user defined WM_SYSICON message.
 	case WM_SYSICON:
 	{
 
 		switch (wParam)
 		{
 		case ID_TRAY_APP_ICON:
-			SetForegroundWindow(Hwnd);
-
+			
 			break;
 		}
-
 
 		if (lParam == WM_LBUTTONUP)
 		{
@@ -201,13 +168,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			// Get current mouse position.
 			POINT curPoint;
 			GetCursorPos(&curPoint);
-			SetForegroundWindow(Hwnd);
-
-			// TrackPopupMenu blocks the app until TrackPopupMenu returns
 
 			UINT clicked = TrackPopupMenu(Hmenu, TPM_RETURNCMD | TPM_NONOTIFY, curPoint.x, curPoint.y, 0, hwnd, NULL);
-
-
 
 			SendMessage(hwnd, WM_NULL, 0, 0); // send benign message to window to make sure the menu goes away.
 			if (clicked == ID_TRAY_EXIT)
@@ -219,8 +181,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 	}
 	break;
-
-	// intercept the hittest message..
 	case WM_NCHITTEST:
 	{
 		UINT uHitTest = DefWindowProc(hwnd, WM_NCHITTEST, wParam, lParam);
@@ -246,9 +206,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
-	DWORD SHIFT_key = 0;
 	DWORD CTRL_key = 0;
-	DWORD ALT_key = 0;
 
 	if ((nCode == HC_ACTION) && ((wParam == WM_SYSKEYDOWN) || (wParam == WM_KEYDOWN)))
 	{
@@ -263,10 +221,7 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 		lpszKeyName[i] = ']';
 
 		int key = hooked_key.vkCode;
-
-		SHIFT_key = GetAsyncKeyState(VK_SHIFT);
 		CTRL_key = GetAsyncKeyState(VK_CONTROL);
-		ALT_key = GetAsyncKeyState(VK_MENU);
 
 		if (key >= 'A' && key <= 'Z')
 		{
@@ -286,16 +241,9 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 				MessageBox(NULL, "Shutting down", "H O T K E Y", MB_OK);
 				PostQuitMessage(0);
 			}*/
-
-			//printf("key = %c\n", key);
-
-			SHIFT_key = 0;
 			CTRL_key = 0;
-			ALT_key = 0;
 
 		}
-
-		//printf("lpszKeyName = %s\n", lpszKeyName);
 	}
 	return CallNextHookEx(KBHook, nCode, wParam, lParam);
 }
