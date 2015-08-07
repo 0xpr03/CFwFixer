@@ -12,7 +12,7 @@ public:
 private:
 	void get_window_handle();
 	void stripWindow();
-	void redoWindow();
+	void minimizeWindow();
 	char * windowName;
 	HWND old_handle = NULL;
 	HWND window_handle = NULL;

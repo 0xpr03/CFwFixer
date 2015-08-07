@@ -19,7 +19,7 @@ boolean WindowHandler::Run() {
 	if (old_handle == window_handle) {
 		if (is_fixed) {
 			// code fo unfix it
-			redoWindow();
+			minimizeWindow();
 			is_fixed = false;
 		}
 		else {
@@ -37,8 +37,7 @@ boolean WindowHandler::Run() {
 }
 
 void WindowHandler::stripWindow() {
-	RECT rcWindow, rcClient;
-	GetWindowRect(window_handle, &rcWindow);
+	RECT rcClient;
 	GetClientRect(window_handle, &rcClient);
 
 	SetWindowLongPtr(window_handle, GWL_STYLE, GetWindowLongPtr(window_handle, GWL_EXSTYLE) | WS_EX_TOPMOST);
@@ -47,11 +46,10 @@ void WindowHandler::stripWindow() {
 	ShowWindow(window_handle, SW_SHOW);
 }
 
-void WindowHandler::redoWindow() {
+void WindowHandler::minimizeWindow() {
 	SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	SetWindowLongPtr(window_handle, GWL_STYLE, GetWindowLongPtr(window_handle, GWL_STYLE));
-	//RedrawWindow(window_handle, RDW_FRAMECHANGED);
-	ShowWindow(window_handle, SW_SHOW);
+	ShowWindow(window_handle, SW_MINIMIZE);
 }
 
 std::string WindowHandler::testFunction() {
@@ -69,6 +67,8 @@ std::string WindowHandler::testFunction() {
 
 WindowHandler::~WindowHandler()
 {
+	delete window_handle;
+	delete old_handle;
 }
 
 void WindowHandler::get_window_handle()
