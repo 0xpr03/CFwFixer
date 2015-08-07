@@ -20,7 +20,7 @@ WindowHandler wHandler = WindowHandler::WindowHandler(CF_WINDOW);
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 char* GetLastErrorString(void);
-void print_message(char *);
+void print_message(UINT flag, int timeout, const char * title, const char * mesage);
 void InitNotifyIconData();
 
 
@@ -131,33 +131,13 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
 		break;
 	case WM_TRAY_READY:
-		notifyIconData.uFlags = NIF_INFO;
-		strcpy_s(notifyIconData.szInfoTitle, "Started"); // Title
-		strcpy_s(notifyIconData.szInfo, "CF window fixer is ready\nPress Str + L in CF.\n© Aron Heinecke"); // Copy Tip
-		notifyIconData.uTimeout = 3000;
-		notifyIconData.dwInfoFlags = NIIF_INFO;
-
-		Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
+		print_message(NIIF_INFO,5000,"Started","CF window fixer is ready\nPress Str + L in CF.\n© Aron Heinecke");
 		break;
 	case WM_WINDOW_ERROR:
-		notifyIconData.uFlags = NIF_INFO;
-		strcpy_s(notifyIconData.szInfoTitle, "ERROR"); // Title
-		strcpy_s(notifyIconData.szInfo, "No window found!"); // Copy Tip
-		notifyIconData.uTimeout = 3000;
-		notifyIconData.dwInfoFlags = NIIF_ERROR;
-
-		Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
+		print_message(NIIF_ERROR,3000,"ERROR", "No window found!");
 		break;
 	case WM_SYSICON:
 	{
-
-		switch (wParam)
-		{
-		case ID_TRAY_APP_ICON:
-			
-			break;
-		}
-
 		if (lParam == WM_LBUTTONUP)
 		{
 			
@@ -236,11 +216,10 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 				CTRL_key = 0;
 			}
 
-			/*if (CTRL_key != 0 && key == 'q')
+			if (CTRL_key != 0 && key == 't')
 			{
-				MessageBox(NULL, "Shutting down", "H O T K E Y", MB_OK);
-				PostQuitMessage(0);
-			}*/
+				print_message(NIIF_INFO, 5000, "test", wHandler.testFunction());
+			}
 			CTRL_key = 0;
 
 		}
@@ -248,9 +227,14 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 	return CallNextHookEx(KBHook, nCode, wParam, lParam);
 }
 
-void print_message(char * str) {
-	using namespace std;
-	cout << *str;
+void print_message(UINT flag,int timeout,const char * title, const char * mesage) {
+	notifyIconData.uFlags = NIF_INFO;
+	strcpy_s(notifyIconData.szInfoTitle, title); // Title
+	strcpy_s(notifyIconData.szInfo, mesage); // Copy Tip
+	notifyIconData.uTimeout = timeout;
+	notifyIconData.dwInfoFlags = flag;
+
+	Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
 }
 
 char* GetLastErrorString(void)

@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "WindowHandler.h"
 
-#define CF_WINDOW		    "CROSSFIRE"
+#define CF_WINDOW		    "Unbenannt - Editor"
 #define ID_TRAY_APP_ICON    1001
 #define ID_TRAY_EXIT        1002
 #define WM_SYSICON          (WM_USER + 1)
