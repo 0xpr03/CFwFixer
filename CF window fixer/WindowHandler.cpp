@@ -37,8 +37,13 @@ boolean WindowHandler::Run() {
 }
 
 void WindowHandler::stripWindow() {
+	RECT rcWindow, rcClient;
+	GetWindowRect(window_handle, &rcWindow);
+	GetClientRect(window_handle, &rcClient);
+
 	SetWindowLongPtr(window_handle, GWL_STYLE, GetWindowLongPtr(window_handle, GWL_EXSTYLE) | WS_EX_TOPMOST);
 	SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	MoveWindow(window_handle,0,0,rcClient.right,rcClient.bottom,true);
 	ShowWindow(window_handle, SW_SHOW);
 }
 
@@ -49,18 +54,17 @@ void WindowHandler::redoWindow() {
 	ShowWindow(window_handle, SW_SHOW);
 }
 
-const char * WindowHandler::testFunction() {
+std::string WindowHandler::testFunction() {
+	RECT rcWindow, rcClient;
 	get_window_handle();
 	if (window_handle == NULL)
-		return "no window";
-
-	RECT rcWindow, rcClient;
+		return "error";
 
 	GetWindowRect(window_handle, &rcWindow);
 	GetClientRect(window_handle, &rcClient);
-	std::string s = "Window: (" + std::to_string(rcWindow.left) + " " + std::to_string(rcWindow.top) + ")  (" + std::to_string(rcWindow.right) + " " + std::to_string(rcWindow.bottom);
-	s += ")\nClient: (" + std::to_string(rcClient.left) + " " + std::to_string(rcClient.top) + ") (" + std::to_string(rcClient.right) + " " + std::to_string(rcClient.bottom)+")";
-	return s.c_str();
+	std::string s = "Window: (" + std::to_string(rcWindow.left) + " | " + std::to_string(rcWindow.top) + ")  (" + std::to_string(rcWindow.right) + " | " + std::to_string(rcWindow.bottom);
+	s += ")\nClient: (" + std::to_string(rcClient.left) + " | " + std::to_string(rcClient.top) + ") (" + std::to_string(rcClient.right) + " | " + std::to_string(rcClient.bottom)+")";
+	return s;
 }
 
 WindowHandler::~WindowHandler()

@@ -7,7 +7,7 @@ public:
 	WindowHandler(char * window_name);
 	boolean validName();
 	boolean Run();
-	const char * testFunction();
+	std::string testFunction();
 	~WindowHandler();
 private:
 	void get_window_handle();

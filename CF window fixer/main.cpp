@@ -131,7 +131,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
 		break;
 	case WM_TRAY_READY:
-		print_message(NIIF_INFO,5000,"Started","CF window fixer is ready\nPress Str + L in CF.\n© Aron Heinecke");
+		print_message(NIIF_INFO,5000,"Started","CF window fixer is ready\nPress Str + L in CF.\nby ProcTrap");
 		break;
 	case WM_WINDOW_ERROR:
 		print_message(NIIF_ERROR,3000,"ERROR", "No window found!");
@@ -218,7 +218,7 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 			if (CTRL_key != 0 && key == 't')
 			{
-				print_message(NIIF_INFO, 5000, "test", wHandler.testFunction());
+				print_message(NIIF_INFO, 5000, "test", wHandler.testFunction().c_str());
 			}
 			CTRL_key = 0;
 
