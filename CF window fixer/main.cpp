@@ -131,10 +131,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		PostMessage(hwnd, WM_TRAY_READY, 0, 0);
 		break;
 	case WM_TRAY_READY:
-		print_message(NIIF_INFO,5000,"Started","CF window fixer is ready\nPress Str + L in CF.\nby ProcTrap");
+		print_message(NIIF_INFO,5000,"Started", MSG_GREETING);
 		break;
 	case WM_WINDOW_ERROR:
-		print_message(NIIF_ERROR,3000,"ERROR", "No window found!");
+		print_message(NIIF_ERROR,3000,"ERROR", MSG_WINDOW_ERROR);
 		break;
 	case WM_SYSICON:
 	{
@@ -208,20 +208,23 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 			if (GetAsyncKeyState(VK_SHIFT) >= 0) key += 32;
 
-			if (CTRL_key != 0 && key == 'l')
+			if (CTRL_key != 0)
 			{
-				if (wHandler.Run()) {
-					PostMessage(Hwnd, WM_WINDOW_ERROR, 0, 0);
+				if (key == 'l') {
+					if (wHandler.Run(true)) {
+						PostMessage(Hwnd, WM_WINDOW_ERROR, 0, 0);
+					}
+				}
+				else if (key == 't'){
+					print_message(NIIF_INFO, 5000, "test", wHandler.testFunction().c_str());
+				}
+				else if (key == 'm') {
+					if (wHandler.Run(false)) {
+						PostMessage(Hwnd, WM_WINDOW_ERROR, 0, 0);
+					}
 				}
 				CTRL_key = 0;
 			}
-
-			if (CTRL_key != 0 && key == 't')
-			{
-				print_message(NIIF_INFO, 5000, "test", wHandler.testFunction().c_str());
-			}
-			CTRL_key = 0;
-
 		}
 	}
 	return CallNextHookEx(KBHook, nCode, wParam, lParam);

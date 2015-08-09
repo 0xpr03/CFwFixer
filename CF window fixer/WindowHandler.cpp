@@ -11,28 +11,15 @@ boolean WindowHandler::validName()
 }
 
 /** Retrurns true on window get error */
-boolean WindowHandler::Run() {
+boolean WindowHandler::Run(boolean strip) {
 	get_window_handle();
 	if (window_handle == NULL)
 		return true;
 
-	if (old_handle == window_handle) {
-		if (is_fixed) {
-			// code fo unfix it
-			minimizeWindow();
-			is_fixed = false;
-		}
-		else {
-			// code to fix it
-			stripWindow();
-			is_fixed = true;
-		}
-	}else {
-		// code to fix new window
+	if (strip)
 		stripWindow();
-		is_fixed = true;
-		old_handle = window_handle;
-	}
+	else
+		minimizeWindow();
 	return false;
 }
 
@@ -67,8 +54,6 @@ std::string WindowHandler::testFunction() {
 
 WindowHandler::~WindowHandler()
 {
-	delete window_handle;
-	delete old_handle;
 }
 
 void WindowHandler::get_window_handle()

@@ -6,7 +6,7 @@ class WindowHandler
 public:
 	WindowHandler(char * window_name);
 	boolean validName();
-	boolean Run();
+	boolean Run(boolean strip);
 	std::string testFunction();
 	~WindowHandler();
 private:
@@ -14,8 +14,6 @@ private:
 	void stripWindow();
 	void minimizeWindow();
 	char * windowName;
-	HWND old_handle = NULL;
 	HWND window_handle = NULL;
-	boolean is_fixed = false;
 };
 
