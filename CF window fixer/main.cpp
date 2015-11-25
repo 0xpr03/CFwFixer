@@ -114,11 +114,12 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
-	if (message == WM_TASKBAR && !IsWindowVisible(Hwnd))
+/*	if (message == WM_TASKBAR && !IsWindowVisible(Hwnd))
 	{
 		//minimize();
 		return 0;
 	}
+*/
 
 	switch (message)                  /* handle the messages */
 	{
@@ -138,17 +139,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		break;
 	case WM_SYSICON:
 	{
-		if (lParam == WM_LBUTTONUP)
-		{
-			
-			//restore();
-		}
-		else if (lParam == WM_RBUTTONDOWN)
+		if (lParam == WM_RBUTTONUP)
 		{
 			// Get current mouse position.
 			POINT curPoint;
 			GetCursorPos(&curPoint);
-
+			SetForegroundWindow(hwnd); // needs to be done, or the menu won't disappear on click anywhere else
 			UINT clicked = TrackPopupMenu(Hmenu, TPM_RETURNCMD | TPM_NONOTIFY, curPoint.x, curPoint.y, 0, hwnd, NULL);
 
 			SendMessage(hwnd, WM_NULL, 0, 0); // send benign message to window to make sure the menu goes away.
