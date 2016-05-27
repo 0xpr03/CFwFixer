@@ -24,12 +24,21 @@ boolean WindowHandler::Run(boolean strip) {
 }
 
 void WindowHandler::stripWindow() {
-	RECT rcClient;
-	GetClientRect(window_handle, &rcClient);
 
 	SetWindowLongPtr(window_handle, GWL_STYLE, GetWindowLongPtr(window_handle, GWL_EXSTYLE) | WS_EX_TOPMOST);
-	SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-	MoveWindow(window_handle,0,0,rcClient.right,rcClient.bottom,true);
+
+	int cxScreen = GetSystemMetrics(SM_CXSCREEN);
+	int cyScreen = GetSystemMetrics(SM_CYSCREEN);
+
+	//TODO: add this for multi screens support
+	/*MonitorFromWindow(window_handle,MONITOR_DEFAULTTOPRIMARY);
+
+	int cxScreen = GetSystemMetrics(SM_CXSCREEN);
+	int cyScreen = GetSystemMetrics(SM_CYSCREEN);*/
+
+	//MoveWindow(window_handle,0,0,rcClient.right,rcClient.bottom,true);
+	//SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, cxScreen, cyScreen, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+	SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, cxScreen, cyScreen, SWP_FRAMECHANGED | SWP_DRAWFRAME);
 	ShowWindow(window_handle, SW_SHOW);
 }
 
