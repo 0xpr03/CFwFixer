@@ -114,13 +114,6 @@ int WINAPI WinMain(HINSTANCE hThisInstance,
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
-/*	if (message == WM_TASKBAR && !IsWindowVisible(Hwnd))
-	{
-		//minimize();
-		return 0;
-	}
-*/
-
 	switch (message)                  /* handle the messages */
 	{
 	case WM_ACTIVATE:
@@ -190,11 +183,13 @@ LRESULT __stdcall LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 		DWORD dwMsg = 1;
 		dwMsg += hooked_key.scanCode << 16;
 		dwMsg += hooked_key.flags << 24;
-		char lpszKeyName[1024] = { 0 };
-		lpszKeyName[0] = '[';
 
-		int i = GetKeyNameText(dwMsg, (lpszKeyName + 1), 0xFF) + 1;
-		lpszKeyName[i] = ']';
+		/****Debug******
+		**char lpszKeyName[1024] = { 0 };
+		**lpszKeyName[0] = '[';
+		**int i = GetKeyNameText(dwMsg, (lpszKeyName + 1), 0xFF) + 1;
+		**lpszKeyName[i] = ']';
+		****************/
 
 		int key = hooked_key.vkCode;
 		CTRL_key = GetAsyncKeyState(VK_CONTROL);

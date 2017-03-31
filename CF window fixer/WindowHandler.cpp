@@ -10,7 +10,7 @@ boolean WindowHandler::validName()
 	return window_handle == 0 ? false : true;
 }
 
-/** Retrurns true on window get error */
+/** returns true on window get error */
 boolean WindowHandler::Run(boolean strip) {
 	get_window_handle();
 	if (window_handle == NULL)
